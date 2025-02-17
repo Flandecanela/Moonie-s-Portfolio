@@ -3,6 +3,9 @@ from supabase import create_client, Client
 import requests
 from PIL import Image
 from io import BytesIO
+import pandas as pd
+import plotly.express as px
+
 
 # Configuración de Supabase: reemplaza con tus datos
 SUPABASE_URL = "https://pibviflccqjlzaaxvxdw.supabase.co"
@@ -69,12 +72,56 @@ Obras_filtradas = [
 # Título de la aplicación
 st.title("Moonie's Portfolio")
 
-# Ajuste del diseño para mostrar tarjetas con varias columnas
+# Sección desplegable para las estadísticas y mapas
+with st.expander("Ver estadísticas y mapas", expanded=False):
+    # Convertimos las obras filtradas en un DataFrame para los gráficos
+    df_filtrado = pd.DataFrame(Obras_filtradas)
+    if not df_filtrado.empty:
+        # Dividimos la sección en dos columnas: izquierda para los gráficos circulares y derecha para el sunburst
+        col_izq, col_der = st.columns([2, 1])
+        
+        with col_izq:
+            st.markdown("Estadísticas por categoría")
+            # Creamos tres columnas para los diagramas circulares
+            col_tipo, col_contenido, col_tecnica = st.columns(3)
+            
+            # Gráfico circular para "Tipo"
+            fig_tipo = px.pie(df_filtrado, names='Tipo', title="Tipo")
+            fig_tipo.update_layout(width=400, height=400, margin=dict(l=20, r=20, t=40, b=20))
+            with col_tipo:
+                st.plotly_chart(fig_tipo, use_container_width=False)
+            
+            # Gráfico circular para "Contenido"
+            fig_contenido = px.pie(df_filtrado, names='Contenido', title="Contenido")
+            fig_contenido.update_layout(width=400, height=400, margin=dict(l=20, r=20, t=40, b=20))
+            with col_contenido:
+                st.plotly_chart(fig_contenido, use_container_width=False)
+            
+            # Gráfico circular para "Técnica"
+            fig_tecnica = px.pie(df_filtrado, names='Técnica', title="Técnica")
+            fig_tecnica.update_layout(width=400, height=400, margin=dict(l=20, r=20, t=40, b=20))
+            with col_tecnica:
+                st.plotly_chart(fig_tecnica, use_container_width=False)
+        
+        with col_der:
+            st.markdown("Mapa de calor")
+            fig_sunburst = px.sunburst(
+                df_filtrado,
+                path=['Tipo', 'Contenido', 'Técnica'],
+                title="Categorías"
+            )
+            fig_sunburst.update_layout(width=400, height=400, margin=dict(l=20, r=20, t=40, b=20))
+            st.plotly_chart(fig_sunburst, use_container_width=False)
+    else:
+        st.info("No hay datos para mostrar en los gráficos.")
+
+# Mostrar obras en formato de tarjetas
+st.header("Obras")
 num_columnas = 3  # Número de columnas por fila
 columnas = st.columns(num_columnas)
 
 for index, obra in enumerate(Obras_filtradas):
-    with columnas[index % num_columnas]:  # Distribuir en columnas
+    with columnas[index % num_columnas]:
         st.markdown(
             f"""
             <div>
@@ -85,7 +132,7 @@ for index, obra in enumerate(Obras_filtradas):
         )
         imagen = cargar_imagen(obra["Enlace"])
         if imagen is not None:
-            st.image(imagen, use_container_width=True)  # Se ajusta al ancho de la columna
+            st.image(imagen, use_container_width=True)
         else:
             st.write("Imagen no disponible.")
         st.caption(f"{obra['Tipo']} | {obra['Contenido']} | {obra['Técnica']}")
