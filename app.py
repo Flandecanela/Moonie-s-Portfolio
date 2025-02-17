@@ -29,7 +29,7 @@ def obtener_Obras():
 # Agregar botón para limpiar la caché y actualizar los datos
 if st.sidebar.button("Actualizar datos"):
     st.cache_data.clear()
-    st.experimental_rerun()
+    st.rerun()
 
 # Función para cargar la imagen desde la URL
 @st.cache_data
