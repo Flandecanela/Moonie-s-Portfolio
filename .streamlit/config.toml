@@ -1,0 +1,4 @@
+echo "[server]
+enableCORS = false
+enableXsrfProtection = false
+headless = true" > .streamlit/config.toml
