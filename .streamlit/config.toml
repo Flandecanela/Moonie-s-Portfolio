@@ -1,4 +1,5 @@
-echo "[server]
-enableCORS = false
-enableXsrfProtection = false
-headless = true" > .streamlit/config.toml
+echo "[server]" > ~/.streamlit/config.toml
+echo "enableCORS = false" >> ~/.streamlit/config.toml
+echo "enableXsrfProtection = false" >> ~/.streamlit/config.toml
+echo "enableWebsocketCompression = false" >> ~/.streamlit/config.toml
+echo "headless = true" >> ~/.streamlit/config.toml
