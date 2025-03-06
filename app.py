@@ -65,54 +65,51 @@ if not data:
     st.error("No se pudieron cargar las Obras. Revisa la conexión con Supabase.")
     st.stop()
 
-# Inicializamos variables de sesión para controlar el flujo de la aplicación
+# Inicializar variables de sesión si no existen
 if "started" not in st.session_state:
-    st.session_state["started"] = False
+    st.session_state.started = False
 if "selected_icon" not in st.session_state:
-    st.session_state["selected_icon"] = None
+    st.session_state.selected_icon = None
 if "popup_closed" not in st.session_state:
-    st.session_state["popup_closed"] = False
+    st.session_state.popup_closed = False
 
 # ----- Pantalla de inicio -----
-if not st.session_state["started"]:
+if not st.session_state.started:
     st.title("Bienvenido a Moonie's Portfolio")
-    st.write("Esta aplicación muestra obras de arte filtradas por rangos de fecha y categorías. Aquí puedes explorar diferentes períodos de creación de las obras. Haz clic en 'Iniciar' para comenzar.")
+    st.write(
+        "Esta aplicación muestra obras de arte filtradas por rangos de fecha y categorías. "
+        "Aquí puedes explorar diferentes períodos de creación de las obras. "
+        "Haz clic en 'Iniciar' para comenzar."
+    )
     if st.button("Iniciar"):
-        st.session_state["started"] = True
-        st.experimental_rerun()
+        st.session_state.started = True
 
 # ----- Pantalla de selección de íconos -----
-if st.session_state["started"] and st.session_state["selected_icon"] is None:
+elif st.session_state.started and st.session_state.selected_icon is None:
     st.title("Selecciona un ícono")
     col1, col2, col3 = st.columns(3)
     if col1.button("Ícono 1"):
-        st.session_state["selected_icon"] = 1
-        st.experimental_rerun()
+        st.session_state.selected_icon = 1
     if col2.button("Ícono 2"):
-        st.session_state["selected_icon"] = 2
-        st.experimental_rerun()
+        st.session_state.selected_icon = 2
     if col3.button("Ícono 3"):
-        st.session_state["selected_icon"] = 3
-        st.experimental_rerun()
+        st.session_state.selected_icon = 3
 
-# ----- Popup modal de información -----
-if st.session_state["selected_icon"] is not None and not st.session_state["popup_closed"]:
-    with st.modal("Información"):
-        st.write(f"Placeholder: Este es un texto de ejemplo para el Ícono {st.session_state['selected_icon']}.")
-        if st.button("Cerrar", key="cerrar_popup"):
-            st.session_state["popup_closed"] = True
-            st.experimental_rerun()
+# ----- Popup modal de información (simulado) -----
+elif st.session_state.selected_icon is not None and not st.session_state.popup_closed:
+    st.write(f"Placeholder: Este es un texto de ejemplo para el Ícono {st.session_state.selected_icon}.")
+    if st.button("Cerrar"):
+        st.session_state.popup_closed = True
 
 # ----- Mostrar obras filtradas por fecha tras cerrar el popup -----
-if st.session_state["popup_closed"]:
-    # Definir rangos de fecha según el ícono seleccionado
-    if st.session_state["selected_icon"] == 1:
+elif st.session_state.popup_closed:
+    if st.session_state.selected_icon == 1:
         start_date = "2017-01-01"
         end_date = "2021-06-27"
-    elif st.session_state["selected_icon"] == 2:
+    elif st.session_state.selected_icon == 2:
         start_date = "2021-01-28"
         end_date = "2023-07-24"
-    elif st.session_state["selected_icon"] == 3:
+    elif st.session_state.selected_icon == 3:
         start_date = "2023-07-25"
         end_date = "2025-03-01"
     
@@ -136,8 +133,6 @@ if st.session_state["popup_closed"]:
     else:
         st.info("No se encontraron obras en el rango de fechas seleccionado.")
     
-    # Botón para volver a la selección de íconos (reinicia la vista de popup)
     if st.button("Volver a selección de íconos"):
-        st.session_state["selected_icon"] = None
-        st.session_state["popup_closed"] = False
-        st.experimental_rerun()
+        st.session_state.selected_icon = None
+        st.session_state.popup_closed = False
