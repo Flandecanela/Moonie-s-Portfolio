@@ -74,4 +74,87 @@ if not st.session_state.started:
         "Esta pequeña aplicación está pensada para enseñar de forma sintética los dibujos que Aiden ha hecho sobre su relación conmigo a lo largo de ya casi ocho años de conocerme. A través de ellos se puede dar cuenta de una parte importante de nuestra historia de vida."
         "Las obras están divididas en tres momentos, correspondientes a los años en los que nos conocimos y afianzamos nuestra relación, en los que nos distanciamos, y los que nos reencontramos y nos hicimos pareja"
     )
-    st.write("Haz doble clic en «Iniciar» para 
+    st.write("Haz doble clic en «Iniciar» para comenzar")
+    if st.button("Iniciar"):
+        st.session_state.started = True
+
+# Pantalla de selección de íconos
+elif st.session_state.started and st.session_state.selected_icon is None:
+    st.title("Selecciona un ícono")
+    col1, col2, col3 = st.columns(3)
+    if col1.button("1.Reconocimiento (2017.01.01 - 2021.06.27)"):
+        st.session_state.selected_icon = 1
+    if col2.button("2. Distanciamiento (2021.06.28 - 2023.07.24)"):
+        st.session_state.selected_icon = 2
+    if col3.button("3. Reencuentro (2023.07.25 - 2025.03.01"):
+        st.session_state.selected_icon = 3
+
+# Popup modal de información (simulado)
+elif st.session_state.selected_icon is not None and not st.session_state.popup_closed:
+    st.write(f"Placeholder: Este es un texto de ejemplo para el Ícono {st.session_state.selected_icon}.")
+    if st.button("Cerrar"):
+        st.session_state.popup_closed = True
+
+# Mostrar obras filtradas con filtros adicionales, contadores dinámicos y botón en la parte superior
+elif st.session_state.popup_closed:
+    # Definir el rango de fechas según el ícono seleccionado
+    if st.session_state.selected_icon == 1:
+        start_date = "2017-01-01"
+        end_date = "2021-06-27"
+    elif st.session_state.selected_icon == 2:
+        start_date = "2021-01-28"
+        end_date = "2023-07-24"
+    elif st.session_state.selected_icon == 3:
+        start_date = "2023-07-25"
+        end_date = "2025-03-01"
+    
+    # Filtrar obras por fecha
+    filtered_artworks = filter_by_date(data, start_date, end_date)
+
+    # Barra lateral: Botón para actualizar la caché y filtros adicionales
+    st.sidebar.title("Filtros y Actualización")
+    if st.sidebar.button("Actualizar datos"):
+        st.cache_data.clear()
+
+    # Filtros para refinar los resultados
+    tipos = sorted({obra["Tipo"] for obra in filtered_artworks})
+    contenidos = sorted({obra["Contenido"] for obra in filtered_artworks})
+    tecnicas = sorted({obra["Técnica"] for obra in filtered_artworks})
+    tipo_filtro = st.sidebar.multiselect("Tipo", options=tipos, default=tipos)
+    contenido_filtro = st.sidebar.multiselect("Contenido", options=contenidos, default=contenidos)
+    tecnica_filtro = st.sidebar.multiselect("Técnica", options=tecnicas, default=tecnicas)
+
+    # Contadores dinámicos en la barra lateral
+    st.sidebar.markdown("### Contadores")
+    st.sidebar.metric("Obras totales en rango", len(filtered_artworks))
+    obras_filtradas = [
+        obra for obra in filtered_artworks
+        if obra["Tipo"] in tipo_filtro and obra["Contenido"] in contenido_filtro and obra["Técnica"] in tecnica_filtro
+    ]
+    st.sidebar.metric("Obras mostradas", len(obras_filtradas))
+
+    # Botón para volver a selección de íconos, ubicado en la parte superior
+    if st.button("Volver a selección de íconos"):
+        st.session_state.selected_icon = None
+        st.session_state.popup_closed = False
+
+    # Título
+    st.header("Obras filtradas por fecha y categoría")
+
+    # Mostrar obras filtradas en 5 columnas, con imágenes más pequeñas (ancho=150)
+    if obras_filtradas:
+        num_columnas = 5
+        columnas = st.columns(num_columnas)
+        for index, obra in enumerate(obras_filtradas):
+            with columnas[index % num_columnas]:
+                st.markdown(f"<div><h4 style='margin-bottom: 5px;'>{obra['Título']}</h4></div>", unsafe_allow_html=True)
+                imagen = cargar_imagen(obra["Enlace"])
+                if imagen is not None:
+                    st.image(imagen, width=150)
+                else:
+                    st.write("Imagen no disponible.")
+                st.caption(f"{obra['Tipo']} | {obra['Contenido']} | {obra['Técnica']}")
+                st.write(f"**Fecha:** {obra['Fecha']}")
+                st.markdown("---")
+    else:
+        st.info("No se encontraron obras con los filtros seleccionados.")
