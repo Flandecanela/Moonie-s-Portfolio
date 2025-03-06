@@ -5,6 +5,7 @@ from PIL import Image
 from io import BytesIO
 import pandas as pd
 import plotly.express as px
+import datetime
 
 # Configuración de Supabase: reemplaza con tus datos
 SUPABASE_URL = "https://pibviflccqjlzaaxvxdw.supabase.co"
@@ -20,16 +21,11 @@ def obtener_direct_image_url(url: str) -> str:
         return f"https://i.imgur.com/{image_id}.jpg"
     return url
 
-# Función para obtener las Obras de arte de la tabla "Obras"
+# Función para obtener las Obras de la tabla "Obras"
 @st.cache_data
 def obtener_Obras():
     response = supabase.table("Obras").select("id, Título, Fecha, Enlace, Tipo, Contenido, Técnica").execute()
     return response.data
-
-# Agregar botón para limpiar la caché y actualizar los datos
-if st.sidebar.button("Actualizar datos"):
-    st.cache_data.clear()
-    st.rerun()
 
 # Función para cargar la imagen desde la URL
 @st.cache_data
@@ -48,76 +44,100 @@ def cargar_imagen(url: str):
         st.error(f"Error al cargar la imagen desde {url_directa}: {e}")
         return None
 
+# Función para filtrar obras por rango de fecha (formato YYYY-MM-DD)
+def filter_by_date(data, start_date, end_date):
+    start = datetime.datetime.strptime(start_date, "%Y-%m-%d")
+    end = datetime.datetime.strptime(end_date, "%Y-%m-%d")
+    filtered = []
+    for obra in data:
+        try:
+            fecha = datetime.datetime.strptime(obra["Fecha"], "%Y-%m-%d")
+        except Exception as e:
+            continue
+        if start <= fecha <= end:
+            filtered.append(obra)
+    return filtered
+
 # Obtenemos los datos
 data = obtener_Obras()
 
-# Si no se obtuvieron datos, se muestra un mensaje
 if not data:
     st.error("No se pudieron cargar las Obras. Revisa la conexión con Supabase.")
     st.stop()
 
-# Extraer las opciones únicas para cada filtro a partir de los datos
-Tipos = sorted(list({obra["Tipo"] for obra in data}))
-Contenidos = sorted(list({obra["Contenido"] for obra in data}))
-Técnicas = sorted(list({obra["Técnica"] for obra in data}))
+# Inicializamos variables de sesión para controlar el flujo de la aplicación
+if "started" not in st.session_state:
+    st.session_state["started"] = False
+if "selected_icon" not in st.session_state:
+    st.session_state["selected_icon"] = None
+if "popup_closed" not in st.session_state:
+    st.session_state["popup_closed"] = False
 
-# Barra lateral con los filtros
-st.sidebar.title("Filtros")
-Tipo_filtro = st.sidebar.multiselect("Tipo", options=Tipos, default=Tipos)
-Contenido_filtro = st.sidebar.multiselect("Contenido", options=Contenidos, default=Contenidos)
-Técnica_filtro = st.sidebar.multiselect("Técnica", options=Técnicas, default=Técnicas)
+# ----- Pantalla de inicio -----
+if not st.session_state["started"]:
+    st.title("Bienvenido a Moonie's Portfolio")
+    st.write("Esta aplicación muestra obras de arte filtradas por rangos de fecha y categorías. Aquí puedes explorar diferentes períodos de creación de las obras. Haz clic en 'Iniciar' para comenzar.")
+    if st.button("Iniciar"):
+        st.session_state["started"] = True
+        st.experimental_rerun()
 
-# Filtrar las Obras según las selecciones
-Obras_filtradas = [
-    obra for obra in data
-    if obra["Tipo"] in Tipo_filtro and obra["Contenido"] in Contenido_filtro and obra["Técnica"] in Técnica_filtro
-]
+# ----- Pantalla de selección de íconos -----
+if st.session_state["started"] and st.session_state["selected_icon"] is None:
+    st.title("Selecciona un ícono")
+    col1, col2, col3 = st.columns(3)
+    if col1.button("Ícono 1"):
+        st.session_state["selected_icon"] = 1
+        st.experimental_rerun()
+    if col2.button("Ícono 2"):
+        st.session_state["selected_icon"] = 2
+        st.experimental_rerun()
+    if col3.button("Ícono 3"):
+        st.session_state["selected_icon"] = 3
+        st.experimental_rerun()
 
-# Título de la aplicación
-st.title("Moonie's Portfolio")
+# ----- Popup modal de información -----
+if st.session_state["selected_icon"] is not None and not st.session_state["popup_closed"]:
+    with st.modal("Información"):
+        st.write(f"Placeholder: Este es un texto de ejemplo para el Ícono {st.session_state['selected_icon']}.")
+        if st.button("Cerrar", key="cerrar_popup"):
+            st.session_state["popup_closed"] = True
+            st.experimental_rerun()
 
-# Sección desplegable para las estadísticas y mapas
-with st.expander("Ver estadísticas y mapas", expanded=False):
-    df_filtrado = pd.DataFrame(Obras_filtradas)
-    if not df_filtrado.empty:
-        col_izq, col_der = st.columns([2, 1])
-        
-        with col_izq:
-            st.markdown("Estadísticas por categoría")
-            col_tipo, col_contenido, col_tecnica = st.columns(3)
-            
-            fig_tipo = px.pie(df_filtrado, names='Tipo', title="Tipo")
-            with col_tipo:
-                st.plotly_chart(fig_tipo, use_container_width=False)
-            
-            fig_contenido = px.pie(df_filtrado, names='Contenido', title="Contenido")
-            with col_contenido:
-                st.plotly_chart(fig_contenido, use_container_width=False)
-            
-            fig_tecnica = px.pie(df_filtrado, names='Técnica', title="Técnica")
-            with col_tecnica:
-                st.plotly_chart(fig_tecnica, use_container_width=False)
-        
-        with col_der:
-            st.markdown("Mapa de calor")
-            fig_sunburst = px.sunburst(df_filtrado, path=['Tipo', 'Contenido', 'Técnica'], title="Categorías")
-            st.plotly_chart(fig_sunburst, use_container_width=False)
+# ----- Mostrar obras filtradas por fecha tras cerrar el popup -----
+if st.session_state["popup_closed"]:
+    # Definir rangos de fecha según el ícono seleccionado
+    if st.session_state["selected_icon"] == 1:
+        start_date = "2017-01-01"
+        end_date = "2021-06-27"
+    elif st.session_state["selected_icon"] == 2:
+        start_date = "2021-01-28"
+        end_date = "2023-07-24"
+    elif st.session_state["selected_icon"] == 3:
+        start_date = "2023-07-25"
+        end_date = "2025-03-01"
+    
+    filtered_artworks = filter_by_date(data, start_date, end_date)
+    st.header("Obras filtradas por fecha")
+    
+    if filtered_artworks:
+        num_columnas = 3
+        columnas = st.columns(num_columnas)
+        for index, obra in enumerate(filtered_artworks):
+            with columnas[index % num_columnas]:
+                st.markdown(f"<div><h4 style='margin-bottom: 5px;'>{obra['Título']}</h4></div>", unsafe_allow_html=True)
+                imagen = cargar_imagen(obra["Enlace"])
+                if imagen is not None:
+                    st.image(imagen, use_container_width=True)
+                else:
+                    st.write("Imagen no disponible.")
+                st.caption(f"{obra['Tipo']} | {obra['Contenido']} | {obra['Técnica']}")
+                st.write(f"**Fecha:** {obra['Fecha']}")
+                st.markdown("---")
     else:
-        st.info("No hay datos para mostrar en los gráficos.")
-
-# Mostrar obras en formato de tarjetas
-st.header("Obras")
-num_columnas = 3
-columnas = st.columns(num_columnas)
-
-for index, obra in enumerate(Obras_filtradas):
-    with columnas[index % num_columnas]:
-        st.markdown(f"<div><h4 style='margin-bottom: 5px;'>{obra['Título']}</h4></div>", unsafe_allow_html=True)
-        imagen = cargar_imagen(obra["Enlace"])
-        if imagen is not None:
-            st.image(imagen, use_container_width=True)
-        else:
-            st.write("Imagen no disponible.")
-        st.caption(f"{obra['Tipo']} | {obra['Contenido']} | {obra['Técnica']}")
-        st.write(f"**Fecha:** {obra['Fecha']}")
-        st.markdown("---")
+        st.info("No se encontraron obras en el rango de fechas seleccionado.")
+    
+    # Botón para volver a la selección de íconos (reinicia la vista de popup)
+    if st.button("Volver a selección de íconos"):
+        st.session_state["selected_icon"] = None
+        st.session_state["popup_closed"] = False
+        st.experimental_rerun()
