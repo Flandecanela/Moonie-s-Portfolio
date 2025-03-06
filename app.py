@@ -44,11 +44,14 @@ def cargar_imagen(url: str):
         st.error(f"Error al cargar la imagen desde {url_directa}: {e}")
         return None
 
-# Función para filtrar obras por rango de fecha
+# Función para filtrar obras por rango de fecha (formato YYYY-MM-DD)
 def filter_by_date(data, start_date, end_date):
     start = datetime.datetime.strptime(start_date, "%Y-%m-%d")
     end = datetime.datetime.strptime(end_date, "%Y-%m-%d")
-    return [obra for obra in data if start <= datetime.datetime.strptime(obra["Fecha"], "%Y-%m-%d") <= end]
+    return [
+        obra for obra in data 
+        if start <= datetime.datetime.strptime(obra["Fecha"], "%Y-%m-%d") <= end
+    ]
 
 # Obtener los datos de Supabase
 data = obtener_Obras()
@@ -56,7 +59,7 @@ if not data:
     st.error("No se pudieron cargar las Obras. Revisa la conexión con Supabase.")
     st.stop()
 
-# Inicializar variables de sesión si no existen
+# Inicializar variables de sesión
 if "started" not in st.session_state:
     st.session_state.started = False
 if "selected_icon" not in st.session_state:
@@ -86,15 +89,15 @@ elif st.session_state.started and st.session_state.selected_icon is None:
     if col3.button("Ícono 3"):
         st.session_state.selected_icon = 3
 
-# Popup modal de información
+# Popup modal de información (simulado)
 elif st.session_state.selected_icon is not None and not st.session_state.popup_closed:
     st.write(f"Placeholder: Este es un texto de ejemplo para el Ícono {st.session_state.selected_icon}.")
     if st.button("Cerrar"):
         st.session_state.popup_closed = True
 
-# Mostrar obras filtradas con opciones de filtro adicionales
+# Mostrar obras filtradas con filtros adicionales y contadores dinámicos
 elif st.session_state.popup_closed:
-    # Determinar el rango de fechas según el ícono seleccionado
+    # Definir el rango de fechas según el ícono seleccionado
     if st.session_state.selected_icon == 1:
         start_date = "2017-01-01"
         end_date = "2021-06-27"
@@ -107,27 +110,33 @@ elif st.session_state.popup_closed:
     
     # Filtrar obras por fecha
     filtered_artworks = filter_by_date(data, start_date, end_date)
-    
-    # Obtener listas únicas de categorías para los filtros
+
+    # Barra lateral: Botón para actualizar la caché y filtros adicionales
+    st.sidebar.title("Filtros y Actualización")
+    if st.sidebar.button("Actualizar datos"):
+        st.cache_data.clear()
+        # Al interactuar, la app se re-ejecuta y se recargan los datos
+
+    # Filtros para refinar los resultados
     tipos = sorted({obra["Tipo"] for obra in filtered_artworks})
     contenidos = sorted({obra["Contenido"] for obra in filtered_artworks})
     tecnicas = sorted({obra["Técnica"] for obra in filtered_artworks})
-
-    # Agregar filtros en la barra lateral
-    st.sidebar.title("Filtros")
     tipo_filtro = st.sidebar.multiselect("Tipo", options=tipos, default=tipos)
     contenido_filtro = st.sidebar.multiselect("Contenido", options=contenidos, default=contenidos)
     tecnica_filtro = st.sidebar.multiselect("Técnica", options=tecnicas, default=tecnicas)
 
-    # Aplicar filtros seleccionados por el usuario
+    # Contadores dinámicos en la barra lateral
+    st.sidebar.markdown("### Contadores")
+    st.sidebar.metric("Obras totales en rango", len(filtered_artworks))
+    # Aplicar filtros adicionales
     obras_filtradas = [
         obra for obra in filtered_artworks
         if obra["Tipo"] in tipo_filtro and obra["Contenido"] in contenido_filtro and obra["Técnica"] in tecnica_filtro
     ]
+    st.sidebar.metric("Obras mostradas", len(obras_filtradas))
 
-    # Mostrar las obras filtradas
+    # Mostrar obras filtradas
     st.header("Obras filtradas por fecha y categoría")
-    
     if obras_filtradas:
         num_columnas = 3
         columnas = st.columns(num_columnas)
@@ -144,8 +153,7 @@ elif st.session_state.popup_closed:
                 st.markdown("---")
     else:
         st.info("No se encontraron obras con los filtros seleccionados.")
-    
-    # Botón para volver a la selección de íconos
+
     if st.button("Volver a selección de íconos"):
         st.session_state.selected_icon = None
         st.session_state.popup_closed = False
