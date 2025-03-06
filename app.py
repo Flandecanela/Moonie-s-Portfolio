@@ -72,7 +72,7 @@ if not st.session_state.started:
     st.title("Portafolio de relación de Aiden y Europa")
     st.write(
         "Esta pequeña aplicación está pensada para enseñar de forma sintética los dibujos que Aiden ha hecho sobre su relación conmigo a lo largo de ya casi ocho años de conocerme "
-        "Las obras están divididas en tres momentos, correspondientes a los años en los que nos conocimos y afianzamos nuestra relación, en los que nos distanciamos, y los que nos reencontramos y nos hicimos pareja"
+        "Las obras están divididas en tres épocas que acordamos juntos, correspondientes respectivamente a: 1.La época en la que nos conocimos y afianzamos nuestra relación, 2.La época en la que nos distanciamos, y 3.La época en la que nos reencontramos y nos hicimos pareja"
     )
     st.write("Haz doble clic en «Iniciar» para comenzar")
     if st.button("Iniciar"):
@@ -127,7 +127,7 @@ elif st.session_state.popup_closed:
 
     # Contadores dinámicos en la barra lateral
     st.sidebar.markdown("### Contadores")
-    st.sidebar.metric("Obras totales en rango", len(filtered_artworks))
+    st.sidebar.metric("Obras totales pertenecientes a la época", len(filtered_artworks))
     # Aplicar filtros adicionales
     obras_filtradas = [
         obra for obra in filtered_artworks
