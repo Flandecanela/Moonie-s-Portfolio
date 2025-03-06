@@ -73,9 +73,8 @@ if not st.session_state.started:
     st.write(
         "Esta pequeña aplicación está pensada para enseñar de forma sintética los dibujos que Aiden ha hecho sobre su relación conmigo a lo largo de ya casi ocho años de conocerme "
         "Las obras están divididas en tres momentos, correspondientes a los años en los que nos conocimos y afianzamos nuestra relación, en los que nos distanciamos, y los que nos reencontramos y nos hicimos pareja"
-        
-        "Haz clic en 'Iniciar' para comenzar."
     )
+    st.write("Haz doble clic en «Iniciar» para comenzar)
     if st.button("Iniciar"):
         st.session_state.started = True
 
