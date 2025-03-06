@@ -69,10 +69,10 @@ if "popup_closed" not in st.session_state:
 
 # Pantalla de inicio
 if not st.session_state.started:
-    st.title("Bienvenido a Moonie's Portfolio")
+    st.title("Portafolio de relación de Aiden y Europa")
     st.write(
-        "Esta aplicación muestra obras de arte filtradas por rangos de fecha y categorías. "
-        "Aquí puedes explorar diferentes períodos de creación de las obras. "
+        "Esta pequeña aplicación está pensada para enseñar de forma sintética los dibujos que Aiden ha hecho sobre su relación conmigo a lo largo de ya casi ocho años de conocerme "
+        "Las obras están divididas en tres momentos, correspondientes a los años en los que nos conocimos y afianzamos nuestra relación, en los que nos distanciamos, y los que nos reencontramos y nos hicimos pareja"
         "Haz clic en 'Iniciar' para comenzar."
     )
     if st.button("Iniciar"):
@@ -82,11 +82,11 @@ if not st.session_state.started:
 elif st.session_state.started and st.session_state.selected_icon is None:
     st.title("Selecciona un ícono")
     col1, col2, col3 = st.columns(3)
-    if col1.button("Ícono 1"):
+    if col1.button("1.Reconocimiento (2017.01.01 - 2021.06.27)"):
         st.session_state.selected_icon = 1
-    if col2.button("Ícono 2"):
+    if col2.button("2. Distanciamiento (2021.06.28 - 2023.07.24)"):
         st.session_state.selected_icon = 2
-    if col3.button("Ícono 3"):
+    if col3.button("3. Reencuentri (2023.07.25 - 2025.03.01"):
         st.session_state.selected_icon = 3
 
 # Popup modal de información (simulado)
