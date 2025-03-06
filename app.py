@@ -71,8 +71,8 @@ if "popup_closed" not in st.session_state:
 if not st.session_state.started:
     st.title("Portafolio de relación de Aiden y Europa")
     st.write(
-        "Esta pequeña aplicación está pensada para enseñar de forma sintética los dibujos que Aiden ha hecho sobre su relación conmigo a lo largo de ya casi ocho años de conocerme "
-        "Las obras están divididas en tres épocas que acordamos juntos, correspondientes respectivamente a: 1.La época en la que nos conocimos y afianzamos nuestra relación, 2.La época en la que nos distanciamos, y 3.La época en la que nos reencontramos y nos hicimos pareja"
+        "Esta pequeña aplicación está pensada para enseñar de forma sintética los dibujos que Aiden ha hecho sobre su relación conmigo a lo largo de ya casi ocho años de conocerme. A través de ellos se puede dar cuenta de una parte importante de nuestra historia de vida."
+        "Las obras están divididas en tres momentos, correspondientes a los años en los que nos conocimos y afianzamos nuestra relación, en los que nos distanciamos, y los que nos reencontramos y nos hicimos pareja"
     )
     st.write("Haz doble clic en «Iniciar» para comenzar")
     if st.button("Iniciar"):
@@ -95,7 +95,7 @@ elif st.session_state.selected_icon is not None and not st.session_state.popup_c
     if st.button("Cerrar"):
         st.session_state.popup_closed = True
 
-# Mostrar obras filtradas con filtros adicionales y contadores dinámicos
+# Mostrar obras filtradas con filtros adicionales, contadores dinámicos y botón en la parte superior
 elif st.session_state.popup_closed:
     # Definir el rango de fechas según el ícono seleccionado
     if st.session_state.selected_icon == 1:
@@ -127,13 +127,18 @@ elif st.session_state.popup_closed:
 
     # Contadores dinámicos en la barra lateral
     st.sidebar.markdown("### Contadores")
-    st.sidebar.metric("Obras totales pertenecientes a la época", len(filtered_artworks))
+    st.sidebar.metric("Obras totales en rango", len(filtered_artworks))
     # Aplicar filtros adicionales
     obras_filtradas = [
         obra for obra in filtered_artworks
         if obra["Tipo"] in tipo_filtro and obra["Contenido"] in contenido_filtro and obra["Técnica"] in tecnica_filtro
     ]
     st.sidebar.metric("Obras mostradas", len(obras_filtradas))
+
+    # Botón para volver a selección de íconos, ubicado en la parte superior
+    if st.button("Volver a selección de íconos"):
+        st.session_state.selected_icon = None
+        st.session_state.popup_closed = False
 
     # Mostrar obras filtradas
     st.header("Obras filtradas por fecha y categoría")
@@ -153,7 +158,3 @@ elif st.session_state.popup_closed:
                 st.markdown("---")
     else:
         st.info("No se encontraron obras con los filtros seleccionados.")
-
-    if st.button("Volver a selección de íconos"):
-        st.session_state.selected_icon = None
-        st.session_state.popup_closed = False
