@@ -27,7 +27,7 @@ def obtener_Obras():
     response = supabase.table("Obras").select("id, Título, Fecha, Enlace, Tipo, Contenido, Técnica").execute()
     return response.data
 
-# Función para cargar la imagen desde la URL
+# Función para cargar la imagen desde la URL (no se usa para mostrar, pero se mantiene para otros usos)
 @st.cache_data
 def cargar_imagen(url: str):
     url_directa = obtener_direct_image_url(url)
@@ -141,18 +141,18 @@ elif st.session_state.popup_closed:
     # Título
     st.header("Obras filtradas por fecha y categoría")
 
-    # Mostrar obras filtradas en 5 columnas, con imágenes más pequeñas (ancho=150)
+    # Mostrar obras filtradas en 5 columnas, con títulos de fuente más pequeña y imágenes clicables
     if obras_filtradas:
         num_columnas = 5
         columnas = st.columns(num_columnas)
         for index, obra in enumerate(obras_filtradas):
             with columnas[index % num_columnas]:
-                st.markdown(f"<div><h4 style='margin-bottom: 5px;'>{obra['Título']}</h4></div>", unsafe_allow_html=True)
-                imagen = cargar_imagen(obra["Enlace"])
-                if imagen is not None:
-                    st.image(imagen, width=150)
-                else:
-                    st.write("Imagen no disponible.")
+                # Título con fuente más pequeña
+                st.markdown(f"<div style='font-size: 16px; margin-bottom: 5px;'>{obra['Título']}</div>", unsafe_allow_html=True)
+                # Obtener la URL directa de la imagen
+                image_url = obtener_direct_image_url(obra["Enlace"])
+                # Imagen clicable para expandir (abre en nueva pestaña)
+                st.markdown(f'<a href="{image_url}" target="_blank"><img src="{image_url}" width="150"></a>', unsafe_allow_html=True)
                 st.caption(f"{obra['Tipo']} | {obra['Contenido']} | {obra['Técnica']}")
                 st.write(f"**Fecha:** {obra['Fecha']}")
                 st.markdown("---")
