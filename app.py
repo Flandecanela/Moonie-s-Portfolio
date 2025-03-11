@@ -72,10 +72,14 @@ if "popup_closed" not in st.session_state:
 # Pantalla de inicio
 if not st.session_state.started:
     st.title("Portafolio de relación de Aiden y Europa")
-    st.write(
-        "Esta pequeña aplicación está pensada para enseñar de forma sintética las obras que Aiden ha hecho sobre su relación conmigo a lo largo de ya casi ocho años de conocerme. A través de ellos se puede dar cuenta de una parte importante de nuestra historia de vida. Las obras están divididas en tres momentos, correspondientes a los años en los que nos conocimos y afianzamos nuestra relación, en los que nos distanciamos, y los que nos reencontramos y nos hicimos pareja")
-    st.write("El fondo de archivo consta de las obras que pudimos rescatar y que estamos dispuestxs a enseñar. En total son 136 obras. Las obras en formato tradicional fueron fotografiadas con una cámara digital Sony CyberShot y procesadas con la aplicación CamScanner para Android. Las obras digitales fueron recolectadas de computadoras archivadas, en ocasiones teniendo que hacer uso de software antiguo para su exportación.")
-    st.write("Haz doble clic en «Iniciar» para comenzar")
+    # Se carga el texto de inicio desde un archivo
+    try:
+        with open("inicio_text.txt", "r", encoding="utf-8") as file:
+            inicio_text = file.read()
+    except FileNotFoundError:
+        inicio_text = "El archivo 'inicio_text.txt' no se encontró. Por favor, verifica la ruta."
+    st.write(inicio_text)
+    
     # El botón de actualizar datos se muestra únicamente en la pantalla de inicio
     if st.button("Actualizar datos", key="actualizar_inicio"):
         st.cache_data.clear()
@@ -84,7 +88,7 @@ if not st.session_state.started:
 
 # Pantalla de selección de íconos
 elif st.session_state.started and st.session_state.selected_icon is None:
-    st.title("Selecciona un ícono")
+    st.title("Selecciona una época")
     col1, col2, col3 = st.columns(3)
     if col1.button("1.Reconocimiento (2017.01.01 - 2021.06.27)"):
         st.session_state.selected_icon = 1
@@ -95,7 +99,14 @@ elif st.session_state.started and st.session_state.selected_icon is None:
 
 # Popup modal de información (simulado)
 elif st.session_state.selected_icon is not None and not st.session_state.popup_closed:
-    st.write(f"Placeholder: Este es un texto de ejemplo para el Ícono {st.session_state.selected_icon}.")
+    # Se carga el texto del popup desde un archivo según el ícono seleccionado
+    file_name = f"popup_text_{st.session_state.selected_icon}.txt"
+    try:
+        with open(file_name, "r", encoding="utf-8") as file:
+            popup_text = file.read()
+    except FileNotFoundError:
+        popup_text = f"El archivo '{file_name}' no se encontró."
+    st.markdown(popup_text)
     if st.button("Cerrar"):
         st.session_state.popup_closed = True
 
