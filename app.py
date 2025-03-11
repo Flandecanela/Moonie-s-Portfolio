@@ -24,7 +24,7 @@ def obtener_direct_image_url(url: str) -> str:
 # Función para obtener las Obras de la tabla "Obras"
 @st.cache_data
 def obtener_Obras():
-    response = supabase.table("Obras").select("id, Título, Fecha, Enlace, Tipo, Contenido, Técnica").execute()
+    response = supabase.table("Obras").select("id, Título, Fecha, Enlace, Tipo, Serie, Técnica").execute()
     return response.data
 
 # Función para cargar la imagen desde la URL (no se usa para mostrar, pero se mantiene para otros usos)
@@ -118,10 +118,10 @@ elif st.session_state.popup_closed:
 
     # Filtros para refinar los resultados
     tipos = sorted({obra["Tipo"] for obra in filtered_artworks})
-    contenidos = sorted({obra["Contenido"] for obra in filtered_artworks})
+    series = sorted({obra["Serie"] for obra in filtered_artworks})
     tecnicas = sorted({obra["Técnica"] for obra in filtered_artworks})
     tipo_filtro = st.sidebar.multiselect("Tipo", options=tipos, default=tipos)
-    contenido_filtro = st.sidebar.multiselect("Contenido", options=contenidos, default=contenidos)
+    serie_filtro = st.sidebar.multiselect("Serie", options=series, default=series)
     tecnica_filtro = st.sidebar.multiselect("Técnica", options=tecnicas, default=tecnicas)
 
     # Contadores dinámicos en la barra lateral
@@ -129,7 +129,7 @@ elif st.session_state.popup_closed:
     st.sidebar.metric("Obras totales en rango", len(filtered_artworks))
     obras_filtradas = [
         obra for obra in filtered_artworks
-        if obra["Tipo"] in tipo_filtro and obra["Contenido"] in contenido_filtro and obra["Técnica"] in tecnica_filtro
+        if obra["Tipo"] in tipo_filtro and obra["Serie"] in serie_filtro and obra["Técnica"] in tecnica_filtro
     ]
     st.sidebar.metric("Obras mostradas", len(obras_filtradas))
 
@@ -153,7 +153,7 @@ elif st.session_state.popup_closed:
                 image_url = obtener_direct_image_url(obra["Enlace"])
                 # Imagen clicable para expandir (abre en nueva pestaña)
                 st.markdown(f'<a href="{image_url}" target="_blank"><img src="{image_url}" width="150"></a>', unsafe_allow_html=True)
-                st.caption(f"{obra['Tipo']} | {obra['Contenido']} | {obra['Técnica']}")
+                st.caption(f"{obra['Tipo']} | {obra['Serie']} | {obra['Técnica']}")
                 st.write(f"**Fecha:** {obra['Fecha']}")
                 st.markdown("---")
     else:
