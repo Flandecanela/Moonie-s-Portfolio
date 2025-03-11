@@ -161,7 +161,7 @@ elif st.session_state.popup_closed:
         st.session_state.popup_closed = False
 
     # Título
-    st.header("Obras filtradas por fecha y categoría")
+    st.header("Obras")
 
     # Mostrar obras filtradas en 5 columnas, con títulos de fuente más pequeña e imágenes clicables
     if obras_ordenadas:
