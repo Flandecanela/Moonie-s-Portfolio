@@ -132,6 +132,15 @@ elif st.session_state.popup_closed:
         if obra["Tipo"] in tipo_filtro and obra["Serie"] in serie_filtro and obra["Técnica"] in tecnica_filtro
     ]
     st.sidebar.metric("Obras mostradas", len(obras_filtradas))
+    
+    # NUEVO: Opción para ordenar las obras por fecha
+    orden = st.sidebar.radio("Ordenar por fecha", ("Más antigua a más reciente", "Más reciente a más antigua"))
+    # Ordenamos usando la fecha (se convierte el string a datetime para comparar)
+    obras_ordenadas = sorted(
+        obras_filtradas, 
+        key=lambda obra: datetime.datetime.strptime(obra["Fecha"], "%Y-%m-%d"), 
+        reverse=(orden == "Más reciente a más antigua")
+    )
 
     # Botón para volver a selección de íconos, ubicado en la parte superior
     if st.button("Volver a selección de íconos"):
@@ -141,11 +150,11 @@ elif st.session_state.popup_closed:
     # Título
     st.header("Obras filtradas por fecha y categoría")
 
-    # Mostrar obras filtradas en 5 columnas, con títulos de fuente más pequeña y imágenes clicables
-    if obras_filtradas:
+    # Mostrar obras filtradas en 5 columnas, con títulos de fuente más pequeña e imágenes clicables
+    if obras_ordenadas:
         num_columnas = 5
         columnas = st.columns(num_columnas)
-        for index, obra in enumerate(obras_filtradas):
+        for index, obra in enumerate(obras_ordenadas):
             with columnas[index % num_columnas]:
                 # Título con fuente más pequeña
                 st.markdown(f"<div style='font-size: 16px; margin-bottom: 5px;'>{obra['Título']}</div>", unsafe_allow_html=True)
