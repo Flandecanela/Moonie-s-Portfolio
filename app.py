@@ -53,6 +53,10 @@ def filter_by_date(data, start_date, end_date):
         if start <= datetime.datetime.strptime(obra["Fecha"], "%Y-%m-%d") <= end
     ]
 
+# Botón para actualizar datos en la carga inicial
+if st.button("Actualizar datos"):
+    st.cache_data.clear()
+
 # Obtener los datos de Supabase
 data = obtener_Obras()
 if not data:
