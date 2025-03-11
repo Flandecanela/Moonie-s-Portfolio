@@ -53,9 +53,7 @@ def filter_by_date(data, start_date, end_date):
         if start <= datetime.datetime.strptime(obra["Fecha"], "%Y-%m-%d") <= end
     ]
 
-# Botón para actualizar datos en la carga inicial (con clave única)
-if st.button("Actualizar datos", key="actualizar_principal"):
-    st.cache_data.clear()
+# Se elimina el botón de actualizar datos del ámbito global
 
 # Obtener los datos de Supabase
 data = obtener_Obras()
@@ -78,6 +76,9 @@ if not st.session_state.started:
         "Esta pequeña aplicación está pensada para enseñar de forma sintética las obras que Aiden ha hecho sobre su relación conmigo a lo largo de ya casi ocho años de conocerme. A través de ellos se puede dar cuenta de una parte importante de nuestra historia de vida. Las obras están divididas en tres momentos, correspondientes a los años en los que nos conocimos y afianzamos nuestra relación, en los que nos distanciamos, y los que nos reencontramos y nos hicimos pareja")
     st.write("El fondo de archivo consta de las obras que pudimos rescatar y que estamos dispuestxs a enseñar. En total son 136 obras. Las obras en formato tradicional fueron fotografiadas con una cámara digital Sony CyberShot y procesadas con la aplicación CamScanner para Android. Las obras digitales fueron recolectadas de computadoras archivadas, en ocasiones teniendo que hacer uso de software antiguo para su exportación.")
     st.write("Haz doble clic en «Iniciar» para comenzar")
+    # El botón de actualizar datos se muestra únicamente en la pantalla de inicio
+    if st.button("Actualizar datos", key="actualizar_inicio"):
+        st.cache_data.clear()
     if st.button("Iniciar"):
         st.session_state.started = True
 
@@ -114,11 +115,9 @@ elif st.session_state.popup_closed:
     # Filtrar obras por fecha
     filtered_artworks = filter_by_date(data, start_date, end_date)
 
-    # Barra lateral: Botón para actualizar la caché y filtros adicionales (con clave única)
-    st.sidebar.title("Filtros y Actualización")
-    if st.sidebar.button("Actualizar datos", key="actualizar_sidebar"):
-        st.cache_data.clear()
-
+    # En el sidebar ya no se muestra el botón "Actualizar datos"
+    st.sidebar.title("Filtros")
+    
     # Filtros para refinar los resultados
     tipos = sorted({obra["Tipo"] for obra in filtered_artworks})
     series = sorted({obra["Serie"] for obra in filtered_artworks})
