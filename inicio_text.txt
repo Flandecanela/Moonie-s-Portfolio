@@ -2,7 +2,5 @@ Esta pequeña aplicación está pensada para enseñar de forma sintética las ob
 El fondo de archivo consta de las obras que pudimos rescatar y que estamos dispuestxs a enseñar. En total son 136 obras. Las obras en formato tradicional fueron fotografiadas con una cámara digital Sony CyberShot y procesadas con la aplicación CamScanner para Android. Las obras digitales fueron recolectadas de computadoras archivadas, en ocasiones teniendo que hacer uso de software antiguo para su exportación.    
 
 Cada uno de los expositores de obras tiene la posibilidad de filtrar las obras que se muestran desde la barra lateral en base a tres categorías: 1.Tipo (el propósito original de la obra), 2.Serie (en caso de hacer parte de una serie de elementos comunes), y 3.Técnica (la técnica artística con la que fue elaborada)  
-
-La denominación de las obras es la siguiente: Serie (Número) - NombreDescriptivo. El nombre descriptivo sólo se incluye en algunos casos
   
 Haz doble clic en «Iniciar» para comenzar
