@@ -130,9 +130,9 @@ elif st.session_state.popup_closed:
     st.sidebar.title("Filtros")
     
     # Filtros para refinar los resultados
-    tipos = sorted({obra["Tipo"] for obra in filtered_artworks})
-    series = sorted({obra["Serie"] for obra in filtered_artworks})
-    tecnicas = sorted({obra["Técnica"] for obra in filtered_artworks})
+    tipos = sorted({obra["Tipo"] for obra in filtered_artworks if obra["Tipo"] is not None})
+    series = sorted({obra["Serie"] for obra in filtered_artworks if obra["Serie"] is not None})
+    tecnicas = sorted({obra["Técnica"] for obra in filtered_artworks if obra["Técnica"] is not None})
     tipo_filtro = st.sidebar.multiselect("Tipo", options=tipos, default=tipos)
     serie_filtro = st.sidebar.multiselect("Serie", options=series, default=series)
     tecnica_filtro = st.sidebar.multiselect("Técnica", options=tecnicas, default=tecnicas)
@@ -163,20 +163,19 @@ elif st.session_state.popup_closed:
     # Título
     st.header("Obras")
 
-    # Mostrar obras filtradas en 5 columnas, con títulos de fuente más pequeña e imágenes clicables
+    # Mostrar obras filtradas alineadas horizontalmente
     if obras_ordenadas:
-        num_columnas = 5
-        columnas = st.columns(num_columnas)
-        for index, obra in enumerate(obras_ordenadas):
-            with columnas[index % num_columnas]:
-                # Título con fuente más pequeña
-                st.markdown(f"<div style='font-size: 16px; margin-bottom: 5px;'>{obra['Título']}</div>", unsafe_allow_html=True)
-                # Obtener la URL directa de la imagen
-                image_url = obtener_direct_image_url(obra["Enlace"])
-                # Imagen clicable para expandir (abre en nueva pestaña)
-                st.markdown(f'<a href="{image_url}" target="_blank"><img src="{image_url}" width="150"></a>', unsafe_allow_html=True)
-                st.caption(f"{obra['Tipo']} | {obra['Serie']} | {obra['Técnica']}")
-                st.write(f"**Fecha:** {obra['Fecha']}")
-                st.markdown("---")
+        # Construir un contenedor HTML con estilo "flex" para alinear horizontalmente
+        html = "<div style='display: flex; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 10px;'>"
+        for obra in obras_ordenadas:
+            html += "<div style='flex: 0 0 auto; margin-right: 20px; text-align: center;'>"
+            html += f"<div style='font-size: 16px; margin-bottom: 5px;'>{obra['Título']}</div>"
+            image_url = obtener_direct_image_url(obra["Enlace"])
+            html += f'<a href="{image_url}" target="_blank"><img src="{image_url}" width="150"></a>'
+            html += f"<div style='font-size: 14px; margin-top: 5px;'>{obra['Tipo']} | {obra['Serie']} | {obra['Técnica']}</div>"
+            html += f"<div style='font-size: 14px;'>Fecha: {obra['Fecha']}</div>"
+            html += "</div>"
+        html += "</div>"
+        st.markdown(html, unsafe_allow_html=True)
     else:
         st.info("No se encontraron obras con los filtros seleccionados.")
