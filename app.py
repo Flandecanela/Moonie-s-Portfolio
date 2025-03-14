@@ -129,7 +129,7 @@ elif st.session_state.popup_closed:
     # En el sidebar ya no se muestra el botón "Actualizar datos"
     st.sidebar.title("Filtros")
     
-    # Filtros para refinar los resultados
+    # Filtros para refinar los resultados (solo se consideran valores no nulos)
     tipos = sorted({obra["Tipo"] for obra in filtered_artworks if obra["Tipo"] is not None})
     series = sorted({obra["Serie"] for obra in filtered_artworks if obra["Serie"] is not None})
     tecnicas = sorted({obra["Técnica"] for obra in filtered_artworks if obra["Técnica"] is not None})
@@ -163,12 +163,11 @@ elif st.session_state.popup_closed:
     # Título
     st.header("Obras")
 
-    # Mostrar obras filtradas alineadas horizontalmente
+    # Mostrar obras en una cuadrícula: 5 obras por fila
     if obras_ordenadas:
-        # Construir un contenedor HTML con estilo "flex" para alinear horizontalmente
-        html = "<div style='display: flex; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 10px;'>"
+        html = "<div style='display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px;'>"
         for obra in obras_ordenadas:
-            html += "<div style='flex: 0 0 auto; margin-right: 20px; text-align: center;'>"
+            html += "<div style='text-align: center;'>"
             html += f"<div style='font-size: 16px; margin-bottom: 5px;'>{obra['Título']}</div>"
             image_url = obtener_direct_image_url(obra["Enlace"])
             html += f'<a href="{image_url}" target="_blank"><img src="{image_url}" width="150"></a>'
