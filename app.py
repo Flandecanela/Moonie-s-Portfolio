@@ -8,7 +8,7 @@ import datetime
 
 # --- Configuración de Supabase ---
 SUPABASE_URL = "https://pibviflccqjlzaaxvxdw.supabase.co"
-SUPABASE_KEY = "TU_SUPABASE_KEY"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBpYnZpZmxjY3FqbHphYXh2eGR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk3NTQ2NDIsImV4cCI6MjA1NTMzMDY0Mn0.5BzQPsuPW5ToOC1bkW72229LJUDBUhOHo8woAeiir0Y"
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # --- Funciones auxiliares ---
