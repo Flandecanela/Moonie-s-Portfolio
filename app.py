@@ -82,7 +82,7 @@ elif st.session_state.started and st.session_state.selected_icon is None:
         st.session_state.selected_icon = 1
     if col2.button("2. Distanciamiento (2021-06-28 a 2023-07-24)"):
         st.session_state.selected_icon = 2
-    if col3.button("3. Reencuentro (2023-07-25 a 2025-03-01)"):
+    if col3.button("3. Reencuentro (2023-07-25 al presente)"):
         st.session_state.selected_icon = 3
 
 # Popup modal de información
