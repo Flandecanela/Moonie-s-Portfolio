@@ -21,10 +21,12 @@ def obtener_direct_image_url(url: str) -> str:
 
 @st.cache_data
 def obtener_Obras_df() -> pd.DataFrame:
+    # Obtener datos de Supabase
     response = supabase.table("Obras").select("id, Título, Fecha, Enlace, Tipo, Serie, Técnica").execute()
     data = response.data
     df = pd.DataFrame(data)
     if not df.empty:
+        # Convertir la columna de fecha a datetime
         df['Fecha'] = pd.to_datetime(df['Fecha'], format="%Y-%m-%d", errors='coerce')
     return df
 
@@ -41,17 +43,23 @@ def cargar_imagen(url: str):
         st.error(f"Error al cargar la imagen desde {url_directa}: {e}")
         return None
 
-# --- Inicializar variables de sesión ---
+# --- Main ---
+
+# Cargar datos
+df_obras = obtener_Obras_df()
+if df_obras.empty:
+    st.error("No se pudieron cargar las Obras. Revisa la conexión con Supabase.")
+    st.stop()
+
+# Inicializar variables de sesión
 if "started" not in st.session_state:
     st.session_state.started = False
 if "selected_icon" not in st.session_state:
     st.session_state.selected_icon = None
 if "popup_closed" not in st.session_state:
     st.session_state.popup_closed = False
-if "enlarged_image" not in st.session_state:
-    st.session_state.enlarged_image = None
 
-# --- Pantalla de inicio ---
+# Pantalla de inicio
 if not st.session_state.started:
     st.title("Portafolio de relación de Aiden y Europa")
     try:
@@ -66,7 +74,7 @@ if not st.session_state.started:
     if st.button("Iniciar"):
         st.session_state.started = True
 
-# --- Selección de época ---
+# Selección de época
 elif st.session_state.started and st.session_state.selected_icon is None:
     st.title("Selecciona una época")
     col1, col2, col3 = st.columns(3)
@@ -77,7 +85,7 @@ elif st.session_state.started and st.session_state.selected_icon is None:
     if col3.button("3. Reencuentro (2023-07-25 a 2025-03-01)"):
         st.session_state.selected_icon = 3
 
-# --- Popup modal de información ---
+# Popup modal de información
 elif st.session_state.selected_icon is not None and not st.session_state.popup_closed:
     file_name = f"popup_text_{st.session_state.selected_icon}.txt"
     try:
@@ -89,10 +97,9 @@ elif st.session_state.selected_icon is not None and not st.session_state.popup_c
     if st.button("Cerrar"):
         st.session_state.popup_closed = True
 
-# --- Mostrar obras filtradas y filtros adicionales ---
+# Mostrar obras filtradas y con filtros adicionales
 elif st.session_state.popup_closed:
-    df_obras = obtener_Obras_df()
-    # Definir rango de fechas según ícono seleccionado
+    # Definir el rango de fechas según el ícono seleccionado
     if st.session_state.selected_icon == 1:
         start_date, end_date = pd.Timestamp("2017-01-01"), pd.Timestamp("2021-06-27")
     elif st.session_state.selected_icon == 2:
@@ -100,7 +107,7 @@ elif st.session_state.popup_closed:
     elif st.session_state.selected_icon == 3:
         start_date, end_date = pd.Timestamp("2023-07-25"), pd.Timestamp("2025-03-01")
     
-    # Filtrado vectorizado por fechas
+    # Filtrar obras por fecha usando operaciones vectorizadas
     df_filtrado = df_obras[(df_obras['Fecha'] >= start_date) & (df_obras['Fecha'] <= end_date)]
     
     # Filtros en la barra lateral
@@ -116,6 +123,7 @@ elif st.session_state.popup_closed:
     st.sidebar.markdown("### Contadores")
     st.sidebar.metric("Obras totales en rango", len(df_filtrado))
     
+    # Aplicar filtros adicionales
     df_final = df_filtrado[
         (df_filtrado['Tipo'].isin(tipo_filtro)) &
         (df_filtrado['Serie'].isin(serie_filtro)) &
@@ -125,26 +133,17 @@ elif st.session_state.popup_closed:
     
     # Ordenar por fecha
     orden = st.sidebar.radio("Ordenar por fecha", ("Más antigua a más reciente", "Más reciente a más antigua"))
-    ascending = (orden == "Más antigua a más reciente")
+    ascending = True if orden == "Más antigua a más reciente" else False
     df_final = df_final.sort_values(by="Fecha", ascending=ascending)
     
     # Botón para volver a selección de íconos
     if st.button("Volver a selección de íconos"):
         st.session_state.selected_icon = None
         st.session_state.popup_closed = False
-        st.session_state.enlarged_image = None
 
     st.header("Obras")
     
-    # --- Mostrar imagen ampliada (simulación de modal) ---
-    if st.session_state.enlarged_image is not None:
-        with st.container():
-            st.markdown("### Imagen Ampliada")
-            st.image(st.session_state.enlarged_image, use_column_width=True)
-            if st.button("Cerrar imagen ampliada"):
-                st.session_state.enlarged_image = None
-
-    # --- Cuadrícula de obras ---
+    # Mostrar obras en cuadrícula usando st.columns (5 por fila)
     if not df_final.empty:
         n_columns = 5
         rows = [df_final.iloc[i:i+n_columns] for i in range(0, df_final.shape[0], n_columns)]
@@ -155,9 +154,6 @@ elif st.session_state.popup_closed:
                     st.markdown(f"**{obra['Título']}**")
                     image_url = obtener_direct_image_url(obra["Enlace"])
                     st.image(image_url, width=150)
-                    # Botón para ampliar la imagen
-                    if st.button("Ampliar", key=f"ampliar_{obra['id']}"):
-                        st.session_state.enlarged_image = image_url
                     st.markdown(f"{obra['Tipo']} | {obra['Serie']} | {obra['Técnica']}")
                     st.markdown(f"Fecha: {obra['Fecha'].strftime('%Y-%m-%d')}")
     else:
